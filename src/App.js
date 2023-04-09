@@ -1,25 +1,46 @@
-import logo from './logo.svg';
-import './App.css';
+import React , { useState } from "react";
+import { BrowserRouter as Router, Routes , Route, Navigate } from "react-router-dom";
+import Login from "./Login/Login";
+import Home from "./Home/Home";
+import Protected from "./Protected/Protected";
+import NotFound from "./NotFound/NotFound";
+import Topbar from "./Topbar/Topbar";
+import UserContext from "./UserContext";
 
-function App() {
+
+const App = () => {
+const [isLoggedIn , setIsLoggedIn] = useState(false);
+const [token , setToken] = useState("")
+const checkIfLoggedIn = (event) => {
+  setIsLoggedIn(event);
+};
+
+// let accessToken = "";
+
+const checkToken = (event) => {
+  setToken(event);
+  localStorage.setItem("accessToken", event);
+};
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+  <UserContext.Provider value={token}>
+    <Router>
+      {isLoggedIn ? <Topbar /> : null}
+      <Routes>
+        {!isLoggedIn ? (
+          <Route exact path="/" element={<Login checkIfLoggedIn={checkIfLoggedIn} checkToken={checkToken} />} />
+        ) : (
+         <Route path="/" element={<Navigate to="/home" />}/>
+        )}
+        {isLoggedIn ? <Route path="/home" element={<Home />} /> : null}
+        (
+        <Route path="/protected" element={<Protected />} />
+        ) <Route path="/notfound" element={<NotFound />} />
+        <Route path="*" element={<Navigate to="/notfound" />} />
+      </Routes>
+    </Router>
+  </UserContext.Provider>
   );
-}
+};
 
 export default App;
